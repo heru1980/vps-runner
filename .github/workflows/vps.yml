@@ -1,0 +1,75 @@
+name: Remote OpenCode
+
+on:
+  workflow_dispatch:
+
+jobs:
+  remote-opencode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 720
+
+    steps:
+
+      # ==========================================
+      # 1. INSTALL DEPENDENCIES
+      # ==========================================
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl git tmux
+
+      # ==========================================
+      # 2. INSTALL OPENCODE
+      # ==========================================
+      - name: Install OpenCode
+        run: |
+          curl -fsSL https://opencode.ai/install | bash
+
+          export PATH="$HOME/.opencode/bin:$PATH"
+          echo "$HOME/.opencode/bin" >> "$GITHUB_PATH"
+
+          opencode --version
+
+      # ==========================================
+      # 3. PREPARE SSH
+      # ==========================================
+      - name: Prepare SSH
+        run: |
+          sudo mkdir -p /run/sshd
+
+          # Pastikan user runner memiliki shell
+          sudo usermod -s /bin/bash runner
+
+          # SSH hanya menggunakan key, tanpa password
+          sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+          sudo sed -i 's/^#\?PubkeyAuthentication.*/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+
+      # ==========================================
+      # 4. START SSH + CLOUDFLARE TUNNEL
+      # ==========================================
+      - name: Start SSH access
+        uses: valeriangalliat/action-sshd-cloudflared@v4
+
+      # ==========================================
+      # 5. KEEP RUNNER ALIVE
+      # ==========================================
+      - name: Keep runner alive
+        run: |
+          echo ""
+          echo "=============================================="
+          echo "       REMOTE OPENCODE RUNNER READY"
+          echo "=============================================="
+          echo ""
+          echo "Server : Ubuntu GitHub Actions"
+          echo "Masa   : 12 JAM"
+          echo ""
+          echo "Setelah SSH masuk:"
+          echo ""
+          echo "  opencode"
+          echo ""
+          echo "=============================================="
+          echo ""
+
+          while true; do
+            sleep 60
+          done
