@@ -6,7 +6,7 @@ on:
 jobs:
   remote-opencode:
     runs-on: ubuntu-latest
-    timeout-minutes: 720
+    timeout-minutes: 360
 
     steps:
 
